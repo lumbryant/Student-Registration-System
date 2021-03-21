@@ -1,0 +1,9 @@
+CREATE OR REPLACE trigger trg_update_classsize
+AFTER INSERT
+  on Enrollments
+  FOR EACH ROW
+BEGIN
+  UPDATE Classes SET  /* changes class size where classid = new classid*/
+	class_size = class_size + 1 where classid = :NEW.classid;
+END;
+/

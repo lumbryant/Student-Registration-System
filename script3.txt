@@ -1,0 +1,65 @@
+PROCEDURE enrollStudent(p_bnum IN Enrollments.B#%TYPE, p_classid IN Enrollments.classid%TYPE)
+IS	/* these are local variables*/
+	bnum Students.B#%TYPE DEFAULT NULL;
+	cid Enrollments.classid%TYPE;
+	sem Classes.semester%TYPE DEFAULT 'Spring';
+	yr Classes.year%TYPE := 2020;
+	cap Classes.limit%TYPE;
+	act Classes.class_size%TYPE;
+	isin Enrollments.classid%TYPE;
+	four number;
+	error number := 0;
+BEGIN /* Tests the variables with parameters inputs from procedure. It will iterate over all errors to
+return all errors the procedure has encountered. If not errors are found, student will be enrolled*/
+  BEGIN
+	SELECT B# into bnum from Students where B# = p_bnum;
+	EXCEPTION
+		WHEN NO_DATA_FOUND THEN
+		dbms_output.put_line('The B# is invalid.');
+		error := 1;
+  END;
+  BEGIN
+	SELECT classid into cid from Classes where classid = p_classid;
+	EXCEPTION
+		WHEN NO_DATA_FOUND THEN
+		dbms_output.put_line('The classid is invalid.');
+		error := 1;
+  END;
+  BEGIN
+	SELECT year into yr from Classes where classid = p_classid AND year = 2020;
+	SELECT semester into sem from Classes where classid = p_classid AND semester = 'Spring';
+	IF yr != 2020 OR sem != 'Spring' THEN
+	dbms_output.put_line('Cannot enroll into a class from a previous semester.');
+	ELSE NULL;
+	END IF;
+  EXCEPTION
+	WHEN NO_DATA_FOUND THEN
+	NULL;
+  END;
+  
+	SELECT limit into cap from Classes where classid = p_classid;
+	SELECT class_size into act from Classes where classid = p_classid;
+	IF act = cap or act > cap THEN
+		dbms_output.put_line('The class is already full.');
+		error := 1;
+	END IF;
+	SELECT COUNT(*) into isin from Enrollments where B# = p_bnum and classid = p_classid;
+	IF isin = 1 THEN
+		dbms_output.put_line('The student is already in the class.');
+		error := 1;
+	END IF;
+	SELECT COUNT(B#) into four from (SELECT * from Enrollments inner join Classes ON Classes.classid = Enrollments.classid) 
+	where semester = 'Spring' AND year = 2020 AND B# = p_bnum;
+	IF four = 4 THEN
+		dbms_output.put_line('Students cannot enroll into more than four courses in the same semester.');
+		error :=1;
+	END IF;
+/* If there was any error, error = 1 and will not enroll student*/
+	IF error = 0 THEN
+		INSERT into Enrollments values(p_bnum, p_classid, NULL);
+		dbms_output.put_line('Student successfully enrolled.');
+	END IF;
+EXCEPTION
+	WHEN NO_DATA_FOUND THEN
+	NULL;
+END;

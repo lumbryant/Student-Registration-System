@@ -1,0 +1,19 @@
+CREATE OR REPLACE TRIGGER trg_insert_enrollment
+AFTER INSERT
+  on Enrollments
+  FOR EACH ROW
+BEGIN		/* After inserting on enrollments, it will put below values for their respective columns, utilizing the new B# concatenated with new classid as the key value.*/
+	insert into Logs values(log_seq.nextval, user, sysdate, 'Enrollments', 'INSERT', :NEW.B# || ',' || :NEW.classid);
+END;
+/
+
+/* Created trigger called trg_insert_enrollment which executes after inserting into enrollments. It iterates over each row and will go to the next value from the sequential function created from question 1. Then it fits the rest of the parameters required for the logs table. Same theory for trg_delete_enrollment, except we use :OLD B# and class id. */
+
+CREATE OR REPLACE TRIGGER trg_delete_enrollment
+AFTER DELETE
+  on Enrollments
+  FOR EACH ROW
+BEGIN		/* After deleting from enrollments, it will put below values for their respective columns, utilizing the old B# concatenated with old classid as the key value.*/
+	insert into Logs values(log_seq.nextval, user, sysdate, 'Enrollments', 'DELETE', :OLD.B# || ',' || :OLD.classid);
+END;
+/

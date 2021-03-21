@@ -1,0 +1,28 @@
+CREATE OR REPLACE TRIGGER trg_update_classsize_del
+/*
+updates class_size by -1 after delete on enrollments
+*/
+AFTER DELETE
+	ON enrollments
+	FOR EACH row
+BEGIN
+	UPDATE classes
+	SET class_size=class_size-1
+	WHERE classid=:OLD.classid;
+END;
+/
+
+CREATE OR REPLACE TRIGGER trg_drop_student_class_empty
+/*
+IF class_size=0 after update on class size, prints 'The class now has no students'
+*/
+AFTER UPDATE
+	OF class_size
+	ON classes
+	FOR EACH row
+BEGIN
+	IF :NEW.class_size=0 THEN
+		dbms_output.put_line('The class now has no students');
+	END IF;
+END;
+/

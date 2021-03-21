@@ -1,0 +1,60 @@
+PROCEDURE dropStudent(p_bnum IN enrollments.B#%TYPE, p_classid IN enrollments.classid%TYPE)
+/*Takes B# and classid as input parameters
+Unenrolls student if B# and classid are valid and the student is currently enrolled in the class in the Spring 2020 semester
+Return NONE*/
+IS
+	student_B# students.B#%TYPE;
+	class_id classes.classid%TYPE;
+	enroll_count number;
+	class_count number;
+	error number :=0;
+	enroll_cnt number;
+BEGIN
+	BEGIN
+		SELECT B# INTO student_B#
+		FROM students
+		WHERE B#=p_bnum;
+		EXCEPTION
+			WHEN NO_DATA_FOUND THEN
+				dbms_output.put_line('The B# is invalid.');
+				error:=1;
+	END;
+	BEGIN
+		SELECT classid INTO class_id
+		FROM classes
+		WHERE classid=p_classid;
+		EXCEPTION
+			WHEN NO_DATA_FOUND THEN
+				dbms_output.put_line('The classid is invalid.');
+				error:=1;
+	END;
+	BEGIN
+		IF error=0 THEN
+			SELECT COUNT(*) INTO enroll_count
+			FROM (SELECT * FROM enrollments WHERE B#=p_bnum AND classid=p_classid);
+			IF enroll_count=0 THEN
+				dbms_output.put_line('The student is not enrolled in the class.');
+				error:=1;
+			END IF;
+		END IF;
+	END;
+	BEGIN
+		IF error=0 THEN
+			SELECT COUNT(*) INTO class_count
+			FROM (SELECT * FROM classes WHERE classid=p_classid AND year=2020 AND semester='Spring');
+			IF class_count=0 THEN
+				dbms_output.put_line('Only enrollment in the current semester can be dropped.');
+				error:=1;
+			END If;
+		END IF;
+	END;
+	IF error=0 THEN
+		DELETE FROM enrollments WHERE B#=p_bnum AND classid=p_classid;
+		dbms_output.put_line('Student has been dropped from the class.');
+		SELECT COUNT(*) INTO enroll_cnt
+		FROM (SELECT * FROM enrollments WHERE B#=p_bnum);
+		IF enroll_cnt=0 THEN
+			dbms_output.put_line('This student is not enrolled in any classes');
+		END IF;
+	END IF;
+END;

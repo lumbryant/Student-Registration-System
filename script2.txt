@@ -1,0 +1,50 @@
+PROCEDURE show_students
+-- uses cursor to open all tuples of students table and returns the cursor result
+IS
+	c1 sys_refcursor;
+BEGIN
+	OPEN c1 FOR
+	SELECT * from students;
+	dbms_sql.return_result(c1);
+END;
+PROCEDURE show_courses
+-- uses cursor to open all tuples of courses table and returns the cursor result
+AS
+    c1 sys_refcursor;
+BEGIN
+    OPEN c1 FOR
+    SELECT * from courses;
+    dbms_sql.return_result(c1);
+END;
+
+PROCEDURE show_classes
+-- uses cursor to open all tuples of classes table and returns the cursor result
+AS
+    c1 sys_refcursor;
+BEGIN
+    OPEN c1 FOR
+    SELECT * from Classes;
+    dbms_sql.return_result(c1);
+END;
+
+PROCEDURE show_enrollments
+-- uses cursor to open all tuples of enrollments table and returns the cursor result
+AS
+    c1 sys_refcursor;
+BEGIN
+    OPEN c1 FOR
+    SELECT * from Enrollments;
+    dbms_sql.return_result(c1);
+END;
+
+PROCEDURE show_logs
+-- uses cursor to open all tuples of logs table and returns the cursor result
+AS
+    c1 sys_refcursor;
+BEGIN
+    OPEN c1 FOR
+    SELECT * from Logs;
+    dbms_sql.return_result(c1);
+END;
+END;
+/
